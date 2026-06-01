@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Convite Paula & Sabatin</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--g:#99CD85;--gd:#5a8f3a;--dark:#0c1a08;--cream:#f7f5ee;--card:#1a2a14;--border:rgba(153,205,133,.2)}
+body{background:#0c1a08;color:#f7f5ee;font-family:system-ui,sans-serif;min-height:100vh;padding:1.5rem}
+h1{font-size:1.4rem;font-weight:500;color:var(--g);margin-bottom:.3rem}
+.sub{font-size:.8rem;color:rgba(247,245,238,.45);margin-bottom:2rem}
+.tabs{display:flex;gap:.5rem;margin-bottom:2rem;flex-wrap:wrap}
+.tab{padding:.6rem 1.2rem;border:1px solid var(--border);background:transparent;color:rgba(247,245,238,.55);font-size:.8rem;cursor:pointer;border-radius:4px;transition:all .2s}
+.tab.active{background:var(--g);border-color:var(--g);color:#0c1a08;font-weight:600}
+.panel{display:none}
+.panel.active{display:block}
+.card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1.5rem;margin-bottom:1.2rem}
+.card-title{font-size:.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--g);margin-bottom:1rem}
+label{display:block;font-size:.75rem;color:rgba(247,245,238,.55);margin-bottom:.3rem;margin-top:.8rem}
+input,textarea,select{width:100%;background:rgba(153,205,133,.06);border:1px solid var(--border);color:#f7f5ee;padding:.65rem .85rem;font-size:.9rem;border-radius:4px;outline:none;transition:border-color .2s}
+input:focus,textarea:focus,select:focus{border-color:var(--g)}
+textarea{resize:vertical;min-height:80px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:500px){.row{grid-template-columns:1fr}}
+.btn{padding:.7rem 1.4rem;border:1px solid var(--g);background:transparent;color:var(--g);font-size:.8rem;cursor:pointer;border-radius:4px;transition:all .2s;font-weight:500}
+.btn:hover{background:var(--g);color:#0c1a08}
+.btn-primary{background:var(--g);color:#0c1a08;border-color:var(--g)}
+.btn-primary:hover{background:#7ab865;border-color:#7ab865}
+.btn-danger{border-color:#e24b4a;color:#e24b4a}
+.btn-danger:hover{background:#e24b4a;color:#fff}
+.btn-sm{padding:.4rem .9rem;font-size:.75rem}
+.actions{display:flex;gap:.6rem;margin-top:1.2rem;flex-wrap:wrap}
+
+/* Photo grid */
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.8rem;margin-top:1rem}
+.photo-item{background:rgba(153,205,133,.05);border:1px solid var(--border);border-radius:6px;overflow:hidden;position:relative}
+.photo-item img{width:100%;aspect-ratio:4/5;object-fit:cover;display:block}
+.photo-item-info{padding:.5rem .6rem}
+.photo-item-info input{font-size:.72rem;padding:.3rem .5rem;margin-top:.3rem}
+.photo-item-info input:first-child{margin-top:0}
+.photo-num{position:absolute;top:.4rem;left:.4rem;background:rgba(12,26,8,.85);color:var(--g);font-size:.68rem;font-weight:700;padding:.15rem .4rem;border-radius:3px}
+.drag-handle{position:absolute;top:.4rem;right:.4rem;cursor:grab;background:rgba(12,26,8,.85);padding:.2rem .35rem;border-radius:3px;font-size:.9rem}
+.drag-handle:active{cursor:grabbing}
+.photo-item.drag-over{border-color:var(--g);box-shadow:0 0 0 2px rgba(153,205,133,.3)}
+
+/* Upload zone */
+.upload-zone{border:2px dashed var(--border);border-radius:8px;padding:2rem;text-align:center;cursor:pointer;transition:border-color .2s;position:relative}
+.upload-zone:hover{border-color:var(--g)}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-zone p{color:rgba(247,245,238,.45);font-size:.85rem}
+.upload-zone span{color:var(--g);font-size:.85rem}
+
+/* Message list */
+.msg-list{display:flex;flex-direction:column;gap:.7rem;margin-top:1rem;max-height:400px;overflow-y:auto}
+.msg-card{background:rgba(153,205,133,.04);border:1px solid var(--border);border-radius:6px;padding:.8rem 1rem;display:flex;gap:.8rem;align-items:flex-start}
+.msg-body{flex:1;min-width:0}
+.msg-author{font-size:.75rem;font-weight:600;color:var(--g);margin-bottom:.2rem}
+.msg-text{font-size:.85rem;color:rgba(247,245,238,.75);font-style:italic;line-height:1.5}
+.msg-ts{font-size:.7rem;color:rgba(247,245,238,.3);margin-top:.3rem}
+.badge{display:inline-block;padding:.15rem .5rem;border-radius:3px;font-size:.68rem;font-weight:600;background:rgba(153,205,133,.15);color:var(--g);margin-left:.4rem}
+.info-box{background:rgba(153,205,133,.07);border:1px solid rgba(153,205,133,.2);border-radius:6px;padding:.9rem 1.1rem;font-size:.82rem;color:rgba(247,245,238,.65);line-height:1.7;margin-bottom:1rem}
+.info-box strong{color:var(--g)}
+.code-block{background:#0a1508;border:1px solid var(--border);border-radius:4px;padding:1rem;font-family:monospace;font-size:.78rem;color:#c4e8a8;line-height:1.6;overflow-x:auto;margin-top:.5rem;white-space:pre}
+.step{display:flex;gap:.8rem;align-items:flex-start;margin-bottom:.9rem}
+.step-num{width:24px;height:24px;border-radius:50%;background:var(--g);color:#0c1a08;font-weight:700;font-size:.75rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:.1rem}
+.step-text{font-size:.85rem;color:rgba(247,245,238,.7);line-height:1.6}
+.step-text strong{color:#f7f5ee}
+hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--g);color:#0c1a08;padding:.7rem 1.2rem;border-radius:6px;font-size:.82rem;font-weight:600;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<h1>⚙️ Painel de Administração</h1>
+<p class="sub">Convite de Casamento — Paula & Sabatin · Apenas para uso do casal</p>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('fotos')">📸 Linha do Tempo</button>
+  <button class="tab" onclick="switchTab('msgs')">💬 Mensagens</button>
+  <button class="tab" onclick="switchTab('info')">📅 Informações</button>
+  <button class="tab" onclick="switchTab('como')">📖 Como usar</button>
+</div>
+
+<!-- FOTOS -->
+<div class="panel active" id="panel-fotos">
+  <div class="card">
+    <div class="card-title">Fotos da Linha do Tempo</div>
+    <p style="font-size:.82rem;color:rgba(247,245,238,.5);margin-bottom:1rem">Arraste para reordenar. Edite o ano e a legenda de cada foto. Adicione novas fotos abaixo.</p>
+    <div class="photo-grid" id="photo-grid"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Adicionar Nova Foto</div>
+    <div class="upload-zone" id="upload-zone">
+      <input type="file" accept="image/*" multiple onchange="handleNewPhotos(this.files)">
+      <p>📎 Toque para seleccionar foto(s)</p>
+      <span>Aceita JPG, PNG — múltiplas de uma vez</span>
+    </div>
+    <div id="new-photos-preview" style="display:none;margin-top:1rem">
+      <div class="photo-grid" id="new-photos-grid"></div>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="addNewPhotos()">✅ Adicionar à linha do tempo</button>
+        <button class="btn" onclick="cancelNewPhotos()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-primary" onclick="generateCode()">⬇️ Gerar código actualizado</button>
+  </div>
+
+  <div id="code-output" style="display:none;margin-top:1.2rem">
+    <div class="card">
+      <div class="card-title">Código gerado — copie e substitua no index.html</div>
+      <p style="font-size:.78rem;color:rgba(247,245,238,.45);margin-bottom:.8rem">Copie o bloco abaixo e substitua a secção <code style="color:var(--g)">const photos = [...]</code> no seu index.html</p>
+      <div class="code-block" id="generated-code"></div>
+      <div class="actions" style="margin-top:.8rem">
+        <button class="btn btn-primary btn-sm" onclick="copyCode()">📋 Copiar código</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MENSAGENS -->
+<div class="panel" id="panel-msgs">
+  <div class="info-box">
+    As mensagens estão guardadas no <strong>Firebase</strong> e são permanentes. Aqui pode ver todas as mensagens dos convidados e apagar as que não quiser.
+  </div>
+
+  <div class="card">
+    <div class="card-title">Configurar Firebase para ver mensagens</div>
+    <label>Cole aqui o seu databaseURL do Firebase</label>
+    <input type="text" id="fb-url" placeholder="https://convite-paula-sabatin-default-rtdb.firebaseio.com" value="https://convite-paula-sabatin-default-rtdb.firebaseio.com">
+    <div class="actions">
+      <button class="btn btn-primary" onclick="loadMessages()">🔄 Carregar mensagens</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Mensagens dos convidados <span id="msg-count" class="badge">0</span></div>
+    <div id="msgs-loading" style="font-size:.82rem;color:rgba(247,245,238,.4);padding:1rem 0">Prima "Carregar mensagens" acima</div>
+    <div class="msg-list" id="msg-list"></div>
+  </div>
+</div>
+
+<!-- INFO -->
+<div class="panel" id="panel-info">
+  <div class="info-box">
+    Para alterar textos, datas e locais no convite, edite directamente no ficheiro <strong>index.html</strong> no GitHub. Aqui estão os textos que pode procurar e substituir.
+  </div>
+
+  <div class="card">
+    <div class="card-title">Datas e horários — procure e substitua no index.html</div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">Acesse <strong>github.com/saredemoz/convite</strong> → clique em <strong>index.html</strong> → prima o ✏️ lápis</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">Use <strong>Ctrl+F</strong> (ou o ícone de pesquisa) para encontrar o texto</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">Substitua pelo novo valor e prima <strong>Commit changes</strong></div>
+    </div>
+
+    <hr>
+
+    <label>Data principal (aparece no hero e intro)</label>
+    <div class="code-block">29 de Agosto de 2026
+29 · Agosto · 2026 · Beira, Moçambique</div>
+
+    <label>Data da contagem regressiva (linha do JS)</label>
+    <div class="code-block">new Date('2026-08-29T10:00:00')</div>
+
+    <label>Prazo de confirmação</label>
+    <div class="code-block">15 de Agosto de 2026</div>
+
+    <label>Horários do programa (procure cada um)</label>
+    <div class="code-block">10h00  → Cerimónia Religiosa
+12h00  → Sessão de Fotografias
+15h00  → Cerimónia Civil
+17h00  → Copo de Água
+18h00  → Entrada dos Noivos</div>
+
+    <label>Locais (procure para alterar)</label>
+    <div class="code-block">Igreja Nossa Senhora de Fátima
+Óasis Macuti Garden</div>
+
+    <label>Nomes dos pais (procure para alterar)</label>
+    <div class="code-block">Paulino Matos Viola
+Sandra Salgado
+José Francisco Arnaldo
+Achiba Francisco Macharavate</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Número de WhatsApp para confirmação</div>
+    <p style="font-size:.82rem;color:rgba(247,245,238,.5);margin-bottom:.8rem">Procure este texto no index.html e substitua pelo número correcto:</p>
+    <div class="code-block">SEU_SCRIPT_ID</div>
+    <p style="font-size:.78rem;color:rgba(247,245,238,.35);margin-top:.5rem">Ou configure o Google Sheets para receber confirmações automaticamente.</p>
+  </div>
+</div>
+
+<!-- COMO USAR -->
+<div class="panel" id="panel-como">
+  <div class="card">
+    <div class="card-title">Como alterar as fotos da linha do tempo</div>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">Vá ao separador <strong>📸 Linha do Tempo</strong></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">Edite o <strong>ano</strong> e a <strong>legenda</strong> de cada foto directamente</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">Para <strong>reordenar</strong>: arraste pelo ícone ☰ para a posição desejada</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-text">Para <strong>adicionar</strong>: use a zona de upload em baixo</div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-text">Prima <strong>Gerar código actualizado</strong> e copie o código gerado</div>
+    </div>
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-text">No GitHub, edite o <strong>index.html</strong>, procure <code style="color:var(--g)">const photos = [</code> e substitua até ao <code style="color:var(--g)">];</code> pelo novo código</div>
+    </div>
+    <div class="step">
+      <div class="step-num">7</div>
+      <div class="step-text">Prima <strong>Commit changes</strong> — o site actualiza em 2 minutos</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Como apagar ou moderar mensagens</div>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">Vá a <strong>console.firebase.google.com</strong></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">Seleccione o projecto <strong>convite-paula-sabatin</strong></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">Clique em <strong>Realtime Database</strong> — vê todas as mensagens</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-text">Para apagar: clique nos 3 pontinhos ao lado da mensagem → <strong>Apagar</strong></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Ficheiros no GitHub</div>
+    <div class="code-block">index.html   — o convite principal (1.1 MB)
+music1.js    — Ed Sheeran · Thinking Out Loud
+music2.js    — Sabatin & Paula · Mutxado
+admin.html   — este painel (só para vocês)</div>
+    <p style="font-size:.78rem;color:rgba(247,245,238,.35);margin-top:.7rem">⚠️ O admin.html é público no GitHub Pages. Não coloque passwords aqui.</p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Tab switching
+function switchTab(id){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active', ['fotos','msgs','info','como'][i]===id));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+}
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ── Photo data — loaded from index.html paste or hardcoded here
+// These are the current photos with their labels and years
+let photoData = [
+  {year:"2017", label:"A foto que mudou tudo · Festa de aniversário", src:null},
+  {year:"2018", label:"Graduação de Sabatin", src:null},
+  {year:"2022", label:"Apresentação oficial de namoro", src:null},
+  {year:"2022", label:"Dia da apresentação de namoro", src:null},
+  {year:"2022", label:"Messica Sarafi", src:null},
+  {year:"2022", label:"Passeio em Messica", src:null},
+  {year:"2023", label:"Saída no KFC", src:null},
+  {year:"2024", label:"Casamento familiar", src:null},
+  {year:"2024", label:"Fim de ano juntos", src:null},
+  {year:"2025", label:"Casamento dos amigos", src:null},
+  {year:"2025", label:"Passeio na Lagoa", src:null},
+  {year:"2025", label:"Passeio aleatório", src:null},
+];
+
+let newPhotosData = [];
+let dragSrc = null;
+
+function renderPhotoGrid(){
+  const grid = document.getElementById('photo-grid');
+  grid.innerHTML = '';
+  photoData.forEach((p, i) => {
+    const div = document.createElement('div');
+    div.className = 'photo-item';
+    div.draggable = true;
+    div.dataset.idx = i;
+    div.innerHTML = `
+      <span class="photo-num">${i+1}</span>
+      <span class="drag-handle" title="Arrastar para reordenar">☰</span>
+      ${p.src ? `<img src="${p.src}" alt="">` : `<div style="aspect-ratio:4/5;background:rgba(153,205,133,.05);display:flex;align-items:center;justify-content:center;font-size:.75rem;color:rgba(153,205,133,.4)">Sem imagem</div>`}
+      <div class="photo-item-info">
+        <input type="text" value="${p.year}" placeholder="Ano" maxlength="4"
+          oninput="photoData[${i}].year=this.value" style="margin-bottom:.3rem">
+        <input type="text" value="${p.label}" placeholder="Legenda"
+          oninput="photoData[${i}].label=this.value">
+        <div style="margin-top:.5rem;display:flex;gap:.4rem">
+          <button class="btn btn-danger btn-sm" onclick="removePhoto(${i})">🗑 Apagar</button>
+          ${!p.src ? `<label style="all:unset"><button class="btn btn-sm" onclick="this.parentElement.querySelector('input').click()">📎 Foto</button><input type="file" accept="image/*" style="display:none" onchange="loadPhotoForSlot(${i},this.files[0])"></label>` : ''}
+        </div>
+      </div>`;
+
+    // Drag events
+    div.addEventListener('dragstart', e=>{ dragSrc=i; div.style.opacity='.4'; });
+    div.addEventListener('dragend', ()=>{ div.style.opacity='1'; });
+    div.addEventListener('dragover', e=>{ e.preventDefault(); div.classList.add('drag-over'); });
+    div.addEventListener('dragleave', ()=>div.classList.remove('drag-over'));
+    div.addEventListener('drop', e=>{ e.preventDefault(); div.classList.remove('drag-over'); if(dragSrc!==null&&dragSrc!==i){ const moved=photoData.splice(dragSrc,1)[0]; photoData.splice(i,0,moved); renderPhotoGrid(); } dragSrc=null; });
+
+    grid.appendChild(div);
+  });
+}
+
+function removePhoto(i){
+  if(!confirm(`Apagar foto "${photoData[i].label}"?`)) return;
+  photoData.splice(i,1);
+  renderPhotoGrid();
+  toast('Foto apagada');
+}
+
+function loadPhotoForSlot(i, file){
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    compressImage(e.target.result, 700, 70, b64 => {
+      photoData[i].src = b64;
+      renderPhotoGrid();
+      toast('Foto carregada ✅');
+    });
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleNewPhotos(files){
+  newPhotosData = [];
+  document.getElementById('new-photos-grid').innerHTML='';
+  document.getElementById('new-photos-preview').style.display='block';
+  Array.from(files).forEach((file,i)=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      compressImage(e.target.result, 700, 70, b64=>{
+        const obj={src:b64,year:new Date().getFullYear().toString(),label:'Nova foto'};
+        newPhotosData.push(obj);
+        const div=document.createElement('div');
+        div.className='photo-item';
+        div.innerHTML=`<img src="${b64}" alt=""><div class="photo-item-info">
+          <input type="text" value="${obj.year}" placeholder="Ano" maxlength="4" oninput="newPhotosData[${newPhotosData.length-1}].year=this.value" style="margin-bottom:.3rem">
+          <input type="text" value="${obj.label}" placeholder="Legenda" oninput="newPhotosData[${newPhotosData.length-1}].label=this.value">
+        </div>`;
+        document.getElementById('new-photos-grid').appendChild(div);
+      });
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function addNewPhotos(){
+  newPhotosData.forEach(p=>photoData.push({...p}));
+  cancelNewPhotos();
+  renderPhotoGrid();
+  toast(`${newPhotosData.length} foto(s) adicionada(s) ✅`);
+}
+
+function cancelNewPhotos(){
+  newPhotosData=[];
+  document.getElementById('new-photos-preview').style.display='none';
+  document.getElementById('new-photos-grid').innerHTML='';
+}
+
+function compressImage(dataUrl, maxDim, quality, cb){
+  const img=new Image();
+  img.onload=()=>{
+    const canvas=document.createElement('canvas');
+    let w=img.width,h=img.height;
+    const r=Math.min(maxDim/w,maxDim/h);
+    if(r<1){w=Math.round(w*r);h=Math.round(h*r);}
+    canvas.width=w;canvas.height=h;
+    canvas.getContext('2d').drawImage(img,0,0,w,h);
+    cb(canvas.toDataURL('image/jpeg',quality/100));
+  };
+  img.src=dataUrl;
+}
+
+function generateCode(){
+  const lines = photoData.map(p=>{
+    const src = p.src || '""';
+    return `  {src:${src.startsWith('"data:') ? src : '"'+src+'"'}, year:"${p.year}", label:"${p.label}"}`;
+  });
+  const code = `const photos = [\n${lines.join(',\n')}\n];`;
+  document.getElementById('generated-code').textContent = code;
+  document.getElementById('code-output').style.display='block';
+  document.getElementById('code-output').scrollIntoView({behavior:'smooth'});
+  toast('Código gerado ✅');
+}
+
+function copyCode(){
+  const code=document.getElementById('generated-code').textContent;
+  navigator.clipboard.writeText(code).then(()=>toast('Copiado ✅')).catch(()=>{
+    const ta=document.createElement('textarea');
+    ta.value=code;document.body.appendChild(ta);ta.select();
+    document.execCommand('copy');document.body.removeChild(ta);
+    toast('Copiado ✅');
+  });
+}
+
+// ── Messages via Firebase REST
+async function loadMessages(){
+  const url = document.getElementById('fb-url').value.trim().replace(/\/$/,'');
+  document.getElementById('msgs-loading').textContent = 'A carregar...';
+  document.getElementById('msg-list').innerHTML='';
+  try {
+    const r = await fetch(url+'/mensagens.json');
+    const data = await r.json();
+    document.getElementById('msgs-loading').style.display='none';
+    if(!data){ document.getElementById('msgs-loading').textContent='Nenhuma mensagem ainda.';document.getElementById('msgs-loading').style.display='block';return; }
+    const msgs = Object.entries(data).sort((a,b)=>(b[1].ts||0)-(a[1].ts||0));
+    document.getElementById('msg-count').textContent = msgs.length;
+    const list = document.getElementById('msg-list');
+    msgs.forEach(([key,m])=>{
+      const date = m.ts ? new Date(m.ts).toLocaleDateString('pt-MZ',{day:'numeric',month:'long',year:'numeric'}) : '';
+      const div=document.createElement('div');div.className='msg-card';
+      div.innerHTML=`<div class="msg-body">
+        <div class="msg-author">${esc(m.nome||'')}</div>
+        <div class="msg-text">${esc(m.texto||'')}</div>
+        <div class="msg-ts">${date}</div>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="deleteMsg('${key}','${url}',this.parentElement)">🗑</button>`;
+      list.appendChild(div);
+    });
+  } catch(e){
+    document.getElementById('msgs-loading').textContent='Erro ao carregar. Verifique o URL do Firebase.';
+    document.getElementById('msgs-loading').style.display='block';
+  }
+}
+
+async function deleteMsg(key, url, el){
+  if(!confirm('Apagar esta mensagem?')) return;
+  try{
+    await fetch(url+'/mensagens/'+key+'.json',{method:'DELETE'});
+    el.remove();
+    const cnt=document.getElementById('msg-count');
+    cnt.textContent=Math.max(0,(+cnt.textContent)-1);
+    toast('Mensagem apagada');
+  }catch(e){ toast('Erro ao apagar'); }
+}
+
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+// Init
+renderPhotoGrid();
+</script>
+</body>
+</html>
